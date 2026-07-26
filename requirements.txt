@@ -1,0 +1,2 @@
+# Dependencies for Telegram Bot
+# Note: telegram_bot.py uses Python standard library, but pyTelegramBotAPI can also be specified if needed
