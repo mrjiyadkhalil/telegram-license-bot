@@ -22,7 +22,12 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8916890685:AAE9oHnAo2VrxaJjcvMJazB4vDD6kJbdwyE")
+# Telegram Bot Token (Read strictly from Environment Variable)
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    logging.error("❌ Environment variable 'BOT_TOKEN' is missing! Please set BOT_TOKEN before running.")
+    sys.exit(1)
+
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 
 # Admin Telegram User IDs (integer list). If empty [], ANYONE can generate keys.
