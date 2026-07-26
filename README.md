@@ -11,4 +11,4 @@ A 24/7 Telegram License Generator Bot for the Lovable Pro extension.
 ## Deployment to Render.com
 1. Create a **Background Worker** on Render.com
 2. Set Start Command: `python3 telegram_bot.py`
-3. Add Environment Variable: `BOT_TOKEN` = ``
+3. Add Environment Variable: `BOT_TOKEN` = `8916890685:AAE9oHnAo2VrxaJjcvMJazB4vDD6kJbdwyE`

@@ -14,7 +14,28 @@ import logging
 import urllib.request
 import urllib.parse
 import ssl
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from generate_license import generate_key
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"OK - Telegram License Bot is running 24/7")
+
+    def log_message(self, format, *args):
+        return  # Suppress HTTP access logs
+
+def start_health_server():
+    port = int(os.getenv("PORT", 8080))
+    try:
+        server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+        logging.info(f"Health check HTTP server listening on port {port}")
+        server.serve_forever()
+    except Exception as e:
+        logging.error(f"Health server error: {e}")
 
 # Configure Logging
 logging.basicConfig(
@@ -30,9 +51,8 @@ if not BOT_TOKEN:
 
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/"
 
-# Admin Telegram User IDs (integer list). If empty [], ANYONE can generate keys.
-# Example: ADMIN_IDS = [123456789]
-ADMIN_IDS = []
+# Admin Telegram User IDs (integer list). Only these Telegram IDs can generate keys.
+ADMIN_IDS = [7942256988]
 
 def make_api_request(method: str, data: dict = None) -> dict:
     """Sends a request to Telegram Bot API using standard library urllib."""
@@ -197,6 +217,11 @@ def process_update(update: dict):
 
 def run_bot():
     logging.info("Starting Telegram License Generator Bot...")
+    
+    # Start HTTP Health Server in background for Render Web Service Free Plan
+    t = threading.Thread(target=start_health_server, daemon=True)
+    t.start()
+
     bot_info = make_api_request("getMe")
     if bot_info.get("ok"):
         res = bot_info["result"]
