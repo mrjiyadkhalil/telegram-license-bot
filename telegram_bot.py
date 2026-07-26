@@ -111,8 +111,12 @@ def handle_start(chat_id: int, message_id: int, user_id: int):
         "• <code>/gen</code> - Interactive Key Generator\n"
         "• <code>/gen lifetime user@email.com</code> - Quick Lifetime Key\n"
         "• <code>/gen 1year user@email.com</code> - Quick 1-Year Key\n"
-        "• <code>/gen 1month user@email.com</code> - Quick 1-Month Key\n"
-        "• <code>/gen 7d user@email.com</code> - Quick Custom Days Key\n"
+        "• <code>/gen 30d user@email.com</code> - Quick 30-Days Key\n"
+        "• <code>/gen 7d user@email.com</code> - Quick 7-Days Key\n"
+        "• <code>/gen 1h user@email.com</code> - Quick 1-Hour Trial Key\n"
+        "• <code>/gen 6h user@email.com</code> - Quick 6-Hours Trial Key\n"
+        "• <code>/gen 15m user@email.com</code> - Quick 15-Mins Trial Key\n"
+        "• <code>/gen 30m user@email.com</code> - Quick 30-Mins Trial Key\n"
         "• <code>/id</code> - Show your Telegram User ID\n"
     )
     keyboard = {
@@ -122,8 +126,16 @@ def handle_start(chat_id: int, message_id: int, user_id: int):
                 {"text": "📅 1 Year Key", "callback_data": "gen_1year"}
             ],
             [
-                {"text": "🌙 1 Month Key", "callback_data": "gen_1month"},
+                {"text": "🌙 30 Days Key", "callback_data": "gen_30d"},
                 {"text": "⏳ 7 Days Key", "callback_data": "gen_7d"}
+            ],
+            [
+                {"text": "⚡ 1 Hour Trial", "callback_data": "gen_1h"},
+                {"text": "⚡ 6 Hours Trial", "callback_data": "gen_6h"}
+            ],
+            [
+                {"text": "⏱️ 15 Mins Trial", "callback_data": "gen_15m"},
+                {"text": "⏱️ 30 Mins Trial", "callback_data": "gen_30m"}
             ]
         ]
     }
@@ -145,8 +157,16 @@ def handle_gen_cmd(chat_id: int, message_id: int, user_id: int, full_text: str):
                     {"text": "📅 1 Year", "callback_data": "gen_1year"}
                 ],
                 [
-                    {"text": "🌙 1 Month", "callback_data": "gen_1month"},
+                    {"text": "🌙 30 Days", "callback_data": "gen_30d"},
                     {"text": "⏳ 7 Days", "callback_data": "gen_7d"}
+                ],
+                [
+                    {"text": "⚡ 1 Hour Trial", "callback_data": "gen_1h"},
+                    {"text": "⚡ 6 Hours Trial", "callback_data": "gen_6h"}
+                ],
+                [
+                    {"text": "⏱️ 15 Mins Trial", "callback_data": "gen_15m"},
+                    {"text": "⏱️ 30 Mins Trial", "callback_data": "gen_30m"}
                 ]
             ]
         }
@@ -161,7 +181,7 @@ def handle_gen_cmd(chat_id: int, message_id: int, user_id: int, full_text: str):
         reply = (
             "✅ <b>License Key Generated Successfully!</b>\n\n"
             f"👤 <b>User:</b> <code>{email}</code>\n"
-            f"🏷️ <b>Type:</b> <code>{l_type.capitalize()}</code>\n\n"
+            f"🏷️ <b>Type:</b> <code>{l_type.upper()}</code>\n\n"
             f"🔑 <b>Key:</b>\n<code>{key}</code>\n\n"
             "<i>Tap key above to copy to clipboard!</i>"
         )
@@ -189,7 +209,7 @@ def handle_callback(callback_query: dict):
             reply = (
                 "✅ <b>License Key Generated!</b>\n\n"
                 f"👤 <b>User:</b> <code>{email}</code>\n"
-                f"🏷️ <b>Type:</b> <code>{l_type.capitalize()}</code>\n\n"
+                f"🏷️ <b>Type:</b> <code>{l_type.upper()}</code>\n\n"
                 f"🔑 <b>Key:</b>\n<code>{key}</code>\n\n"
                 "<i>Tap key above to copy!</i>"
             )

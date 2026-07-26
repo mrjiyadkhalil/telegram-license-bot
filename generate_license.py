@@ -24,15 +24,17 @@ def get_license_secret() -> bytes:
     secret_str = _d(_P1, _K) + _d(_P2, _K)
     return secret_str.encode('utf-8')
 
-def generate_key(license_type: str = 'lifetime', email: str = 'user@proaccess.bd', custom_days: int = None) -> str:
+def generate_key(license_type: str = 'lifetime', email: str = 'user@proaccess.bd', custom_days: int = None, custom_hours: int = None, custom_minutes: int = None) -> str:
     """
     Generates a signed license key string for the given license type and email.
     
     Types supported:
       - 'lifetime' or 'Lifetime'
       - '1year', '365d', '1 Year'
-      - '1month', '30d', '1 Month'
-      - custom_days (int)
+      - '1month', '30d', '30days', '1 Month'
+      - '15m', '30m' (minutes)
+      - '1h', '2h', '6h', '12h' (hours)
+      - custom_days, custom_hours, custom_minutes
     """
     issued = int(time.time() * 1000)
     l_type_lower = str(license_type).lower().strip()
@@ -45,13 +47,41 @@ def generate_key(license_type: str = 'lifetime', email: str = 'user@proaccess.bd
         expires = issued + (365 * 24 * 60 * 60 * 1000)
         type_label = '1 Year'
         dur_code = '1YEAR'
-    elif l_type_lower in ['1month', '1 month', '30d', 'month', '3']:
+    elif l_type_lower in ['1month', '1 month', '30d', '30days', 'month', '3']:
         expires = issued + (30 * 24 * 60 * 60 * 1000)
-        type_label = '1 Month'
+        type_label = '30 Days'
         dur_code = '1MONTH'
-    elif custom_days is not None or l_type_lower.endswith('d'):
+    elif custom_minutes is not None or (l_type_lower.endswith('m') and not l_type_lower.endswith('month')) or l_type_lower.endswith('min') or l_type_lower.endswith('mins') or l_type_lower.endswith('minutes'):
         try:
-            days = custom_days if custom_days is not None else int(l_type_lower.rstrip('d'))
+            if custom_minutes is not None:
+                mins = custom_minutes
+            else:
+                clean_m = l_type_lower.replace('minutes', '').replace('minute', '').replace('mins', '').replace('min', '').replace('m', '')
+                mins = int(clean_m)
+        except ValueError:
+            mins = 15
+        expires = issued + (mins * 60 * 1000)
+        type_label = f'{mins} Mins (Trial)'
+        dur_code = f'{mins}M'
+    elif custom_hours is not None or l_type_lower.endswith('h') or l_type_lower.endswith('hr') or l_type_lower.endswith('hrs') or l_type_lower.endswith('hours'):
+        try:
+            if custom_hours is not None:
+                hrs = custom_hours
+            else:
+                clean_h = l_type_lower.replace('hours', '').replace('hour', '').replace('hrs', '').replace('hr', '').replace('h', '')
+                hrs = int(clean_h)
+        except ValueError:
+            hrs = 1
+        expires = issued + (hrs * 60 * 60 * 1000)
+        type_label = f"{hrs} Hour{'s' if hrs > 1 else ''} (Trial)"
+        dur_code = f'{hrs}H'
+    elif custom_days is not None or l_type_lower.endswith('d') or l_type_lower.endswith('days'):
+        try:
+            if custom_days is not None:
+                days = custom_days
+            else:
+                clean_d = l_type_lower.replace('days', '').replace('day', '').replace('d', '')
+                days = int(clean_d)
         except ValueError:
             days = 30
         expires = issued + (days * 24 * 60 * 60 * 1000)
@@ -78,25 +108,43 @@ def interactive_menu():
     print("\nSelect License Type:")
     print("  [1] Lifetime Access")
     print("  [2] 1 Year Access (365 Days)")
-    print("  [3] 1 Month Access (30 Days)")
+    print("  [3] 30 Days Access (1 Month)")
     print("  [4] Custom Days")
+    print("  [5] Trial Access (Hours)")
+    print("  [6] Trial Access (Minutes)")
     
-    choice = input("\nEnter choice (1-4) [default: 1]: ").strip() or "1"
+    choice = input("\nEnter choice (1-6) [default: 1]: ").strip() or "1"
     
     custom_days = None
+    custom_hours = None
+    custom_minutes = None
     if choice == "1":
         license_type = "lifetime"
     elif choice == "2":
         license_type = "1year"
     elif choice == "3":
-        license_type = "1month"
+        license_type = "30d"
     elif choice == "4":
-        license_type = "custom"
+        license_type = "custom_days"
         try:
             custom_days = int(input("Enter number of days: ").strip())
         except ValueError:
             print("Invalid input. Defaulting to 30 days.")
             custom_days = 30
+    elif choice == "5":
+        license_type = "custom_hours"
+        try:
+            custom_hours = int(input("Enter number of hours (e.g. 1, 2, 6, 12): ").strip())
+        except ValueError:
+            print("Invalid input. Defaulting to 1 hour.")
+            custom_hours = 1
+    elif choice == "6":
+        license_type = "custom_minutes"
+        try:
+            custom_minutes = int(input("Enter number of minutes (e.g. 15, 30, 45): ").strip())
+        except ValueError:
+            print("Invalid input. Defaulting to 15 minutes.")
+            custom_minutes = 15
     else:
         license_type = "lifetime"
 
@@ -113,7 +161,7 @@ def interactive_menu():
 
     keys = []
     for i in range(count):
-        key = generate_key(license_type, email, custom_days)
+        key = generate_key(license_type, email, custom_days, custom_hours, custom_minutes)
         keys.append(key)
         print(f"Key #{i+1}:\n{key}\n")
 
