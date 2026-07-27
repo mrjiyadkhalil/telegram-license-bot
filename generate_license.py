@@ -92,12 +92,10 @@ def generate_key(license_type: str = 'lifetime', email: str = 'user@proaccess.bd
         type_label = 'Lifetime'
         dur_code = 'LIFETIME'
 
-    raw_payload = f"{email}:{issued}:{expires}".encode('utf-8')
-    secret = get_license_secret()
-    signature_hex = hmac.new(secret, raw_payload, hashlib.sha256).hexdigest().upper()
-    
-    code1 = signature_hex[:4]
-    code2 = signature_hex[4:8]
+    ts_sec = int(issued / 1000)
+    ts_hex = f"{ts_sec:08X}"
+    code1 = ts_hex[:4]
+    code2 = ts_hex[4:]
     
     return f"LOVABLE-PRO-{dur_code}-{code1}-{code2}"
 
